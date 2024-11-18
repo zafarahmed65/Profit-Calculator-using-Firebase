@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shahid SuperStore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            margin-top: 20px;
+            max-width: 800px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .profit-display {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .table-container {
+            margin-top: 30px;
+        }
+
+        .table th,
+        .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .table thead {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand text-primary fw-bold" href="#">Shahid SuperStore</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <button class="btn btn-success mx-2" id="endDayBtn">End Day</button>
+                    </li>
+                    <li class="nav-item">
+                        <a href="history.html" class="btn btn-primary mx-2">See History</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">Enter Product Details</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="productName" class="form-label">Product Name</label>
+                    <input type="text" class="form-control" id="productName" placeholder="Enter product name">
+                </div>
+                <div class="mb-3">
+                    <label for="wholesalePrice" class="form-label">Wholesale Price</label>
+                    <input type="number" class="form-control" id="wholesalePrice" placeholder="Enter wholesale price">
+                </div>
+                <div class="mb-3">
+                    <label for="sellingPrice" class="form-label">Selling Price</label>
+                    <input type="number" class="form-control" id="sellingPrice" placeholder="Enter selling price">
+                </div>
+                <div class="d-grid">
+                    <button class="btn btn-primary" id="calculateBtn">Calculate and Save</button>
+                </div>
+                <div class="profit-display">
+                    Profit: Rs <span id="profitDisplay">0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <h3 class="text-center">Records</h3>
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Product Name</th>
+                            <th>Wholesale Price</th>
+                            <th>Selling Price</th>
+                            <th>Profit</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTable">
+                        <!-- Dynamic Data Here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

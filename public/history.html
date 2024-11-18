@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .container {
+            margin-top: 20px;
+        }
+
+        .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            border: 1px solid #e7e7e7;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .list-group-item strong {
+            font-size: 1rem;
+            color: #007bff;
+        }
+
+        .list-group-item button {
+            margin-left: 10px;
+        }
+
+        .details-container {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .details-container h3 {
+            color: #333;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .totals-container h4 {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .table {
+            word-wrap: break-word;
+            table-layout: auto;
+            width: 100%;
+        }
+
+        .table th,
+        .table td {
+            white-space: nowrap;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        @media (max-width: 768px) {
+            .list-group-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .list-group-item strong {
+                margin-bottom: 10px;
+            }
+
+            .details-container {
+                padding: 15px;
+            }
+
+            .details-container h3 {
+                font-size: 1rem;
+            }
+
+            .totals-container h4 {
+                font-size: 0.9rem;
+                margin-top: 10px;
+            }
+
+            .table {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand text-primary fw-bold" href="index.html">Shahid SuperStore</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a href="index.html" class="btn btn-outline-primary mx-2">Dashboard</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 class="my-4 text-primary">History</h2>
+        <ul id="historyList" class="list-group"></ul>
+        <div id="historyDetails" class="details-container"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDtnfGTjFGe0KorLsJjmfrEPaVfPCH_fYs",
+            authDomain: "shahid-98789.firebaseapp.com",
+            projectId: "shahid-98789",
+            storageBucket: "shahid-98789.firebasestorage.app",
+            messagingSenderId: "203756730991",
+            appId: "1:203756730991:web:5f5cf739bbca55f1482b9a",
+            measurementId: "G-VY9CR8YX6S",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const firestoreUrl = "/firestore/v1/projects/shahid-98789/databases/(default)/documents";
+
+        const historyList = document.getElementById("historyList");
+        const historyDetails = document.getElementById("historyDetails");
+
+        const loadHistory = async () => {
+            try {
+                const response = await fetch(`${firestoreUrl}/history`, {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
+                });
+
+                const data = await response.json();
+
+                if (data.documents) {
+                    data.documents.forEach((doc) => {
+                        const folderName = doc.name.split("/").pop(); // Get folder name
+                        const listItem = document.createElement("li");
+                        listItem.classList.add("list-group-item");
+                        listItem.innerHTML = `
+                            <strong>${folderName}</strong>
+                            <div>
+                                <button class="btn btn-primary btn-sm view-btn">View</button>
+                                <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+                            </div>
+                        `;
+
+                        listItem.querySelector(".view-btn").addEventListener("click", () =>
+                            viewHistory(folderName, doc.fields.records.arrayValue.values)
+                        );
+
+                        listItem.querySelector(".delete-btn").addEventListener("click", () =>
+                            deleteHistoryFolder(folderName, listItem)
+                        );
+
+                        historyList.appendChild(listItem);
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading history:", error);
+            }
+        };
+
+        const viewHistory = (folderName, records) => {
+            // Clear previous details
+            historyDetails.innerHTML = "";
+
+            let totalWholesalePrice = 0;
+            let totalSellingPrice = 0;
+            let totalProfit = 0;
+
+            const tableRows = records
+                .map((record) => {
+                    const fields = record.mapValue.fields;
+                    const wholesalePrice = parseFloat(fields.wholesalePrice.doubleValue) || 0;
+                    const sellingPrice = parseFloat(fields.sellingPrice.doubleValue) || 0;
+                    const profit = parseFloat(fields.profit.doubleValue) || 0;
+
+                    totalWholesalePrice += wholesalePrice;
+                    totalSellingPrice += sellingPrice;
+                    totalProfit += profit;
+
+                    return `
+                        <tr>
+                            <td>${fields.date.stringValue}</td>
+                            <td>${fields.productName.stringValue}</td>
+                            <td>${wholesalePrice.toFixed(2)}</td>
+                            <td>${sellingPrice.toFixed(2)}</td>
+                            <td>${profit.toFixed(2)}</td>
+                        </tr>
+                    `;
+                })
+                .join("");
+
+            const table = `
+                <div class="details-container">
+                    <h3>Records for ${folderName}</h3>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Product Name</th>
+                                    <th>Wholesale Price</th>
+                                    <th>Selling Price</th>
+                                    <th>Profit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="totals-container">
+                        <h4>Total Wholesale Price: Rs ${totalWholesalePrice.toFixed(2)}</h4>
+                        <h4>Total Selling Price: Rs ${totalSellingPrice.toFixed(2)}</h4>
+                        <h4>Total Profit: Rs ${totalProfit.toFixed(2)}</h4>
+                    </div>
+                </div>
+            `;
+
+            historyDetails.innerHTML = table;
+        };
+
+        const deleteHistoryFolder = async (folderName, listItem) => {
+            if (!confirm(`Are you sure you want to delete folder "${folderName}"?`)) return;
+
+            try {
+                await fetch(`${firestoreUrl}/history/${folderName}`, {
+                    method: "DELETE",
+                });
+
+                alert(`Folder "${folderName}" deleted successfully.`);
+                listItem.remove(); // Remove the folder from the UI
+                historyDetails.innerHTML = ""; // Clear details if currently viewed
+            } catch (error) {
+                console.error("Error deleting folder:", error);
+            }
+        };
+
+        loadHistory();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
